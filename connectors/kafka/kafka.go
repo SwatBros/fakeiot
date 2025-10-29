@@ -3,6 +3,7 @@ package kafka
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	confluentKafka "github.com/confluentinc/confluent-kafka-go/kafka"
 )
@@ -13,7 +14,10 @@ type KafkaConnector struct {
 	Topic    string
 }
 
-type KafkaProducer = confluentKafka.Producer
+type KafkaProducer struct {
+	Producer  *confluentKafka.Producer
+	WaitGroup *sync.WaitGroup
+}
 
 // NewKafkaProducer creates a new Kafka producer
 func NewKafkaProducer(brokers string) (*KafkaProducer, error) {
@@ -22,6 +26,11 @@ func NewKafkaProducer(brokers string) (*KafkaProducer, error) {
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	producer := &KafkaProducer{
+		Producer:  p,
+		WaitGroup: &sync.WaitGroup{},
 	}
 
 	// Handle events (like delivery reports) in a background goroutine
@@ -34,11 +43,13 @@ func NewKafkaProducer(brokers string) (*KafkaProducer, error) {
 				} else {
 					fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
 				}
+
+				producer.WaitGroup.Done()
 			}
 		}
 	}()
 
-	return p, nil
+	return producer, nil
 }
 
 // Send marshals the data and sends it to Kafka
@@ -48,7 +59,7 @@ func (kc *KafkaConnector) Send(data any) error {
 		return fmt.Errorf("error marshaling data: %w", err)
 	}
 
-	err = kc.Producer.Produce(&confluentKafka.Message{
+	err = kc.Producer.Producer.Produce(&confluentKafka.Message{
 		TopicPartition: confluentKafka.TopicPartition{Topic: &kc.Topic, Partition: confluentKafka.PartitionAny},
 		Value:          bytes,
 	}, nil)
@@ -57,5 +68,11 @@ func (kc *KafkaConnector) Send(data any) error {
 		return fmt.Errorf("error producing message: %w", err)
 	}
 
+	kc.Producer.WaitGroup.Add(1)
+
 	return nil
+}
+
+func (kp *KafkaProducer) Wait() {
+	kp.WaitGroup.Wait()
 }
