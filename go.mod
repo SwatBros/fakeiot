@@ -1,9 +1,10 @@
 module github.com/SwatBros/fakeiot
 
-go 1.25.1
+go 1.26
 
 require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/kelindar/noise v0.1.0
 )
 

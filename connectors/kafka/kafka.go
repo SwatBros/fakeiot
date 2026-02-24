@@ -76,3 +76,8 @@ func (kc *KafkaConnector) Send(data any) error {
 func (kp *KafkaProducer) Wait() {
 	kp.WaitGroup.Wait()
 }
+
+func (kp *KafkaProducer) Close() error {
+	kp.Producer.Close()
+	return nil
+}

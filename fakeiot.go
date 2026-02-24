@@ -2,13 +2,17 @@ package fakeiot
 
 import (
 	"fmt"
+	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Generator struct {
 	World   World
 	Sensors []Sensor
 	Hooks   []Hook
+	Router  *chi.Mux
 }
 
 func (g *Generator) GenerateSteps(steps uint) error {
@@ -41,6 +45,10 @@ func (g *Generator) GenerateInterval(start, end time.Time, step time.Duration) e
 func (g *Generator) RealTime(tick time.Duration) error {
 	ticker := time.NewTicker(tick)
 	defer ticker.Stop()
+
+	if g.Router != nil {
+		go http.ListenAndServe(":3000", g.Router)
+	}
 
 	for range ticker.C {
 		g.World.Update()
