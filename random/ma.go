@@ -4,7 +4,6 @@ import "github.com/kelindar/noise"
 
 type Ma struct {
 	Seed  uint32
-	Q     uint
 	Mu    float32
 	Theta []float32
 
@@ -12,18 +11,13 @@ type Ma struct {
 	e []float32
 }
 
-func NewMa(seed uint32, q uint, mu float32, theta []float32) *Ma {
-	if len(theta) != int(q) {
-		panic("phi length must match p")
-	}
-
+func NewMa(seed uint32, mu float32, theta []float32) *Ma {
 	return &Ma{
 		Seed:  seed,
-		Q:     q,
 		Mu:    mu,
 		Theta: theta,
 		t:     0,
-		e:     make([]float32, q),
+		e:     make([]float32, len(theta)),
 	}
 }
 
@@ -31,8 +25,9 @@ func (a *Ma) Next() float32 {
 	a.t++
 
 	var sum float32
-	for i := uint(0); i < a.Q; i++ {
-		sum += a.Theta[i] * a.e[(a.t-i)%uint(a.Q)]
+	q := uint(len(a.Theta))
+	for i := uint(0); i < q; i++ {
+		sum += a.Theta[i] * a.e[(a.t-i)%q]
 	}
 
 	et := noise.White(a.Seed, a.t)
