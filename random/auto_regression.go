@@ -2,7 +2,7 @@ package random
 
 import "github.com/kelindar/noise"
 
-type Ar struct {
+type AutoRegression struct {
 	Seed uint32
 	Phi  []float32
 
@@ -10,8 +10,8 @@ type Ar struct {
 	x []float32
 }
 
-func NewAr(seed uint32, phi []float32) *Ar {
-	return &Ar{
+func NewAutoRegression(seed uint32, phi []float32) *AutoRegression {
+	return &AutoRegression{
 		Seed: seed,
 		Phi:  phi,
 		t:    0,
@@ -19,7 +19,7 @@ func NewAr(seed uint32, phi []float32) *Ar {
 	}
 }
 
-func (a *Ar) Next() float32 {
+func (a *AutoRegression) Next() float32 {
 	a.t++
 
 	var sum float32

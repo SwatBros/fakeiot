@@ -2,7 +2,7 @@ package random
 
 import "github.com/kelindar/noise"
 
-type Ma struct {
+type MovingAverage struct {
 	Seed  uint32
 	Mu    float32
 	Theta []float32
@@ -11,8 +11,8 @@ type Ma struct {
 	e []float32
 }
 
-func NewMa(seed uint32, mu float32, theta []float32) *Ma {
-	return &Ma{
+func NewMovingAverage(seed uint32, mu float32, theta []float32) *MovingAverage {
+	return &MovingAverage{
 		Seed:  seed,
 		Mu:    mu,
 		Theta: theta,
@@ -21,7 +21,7 @@ func NewMa(seed uint32, mu float32, theta []float32) *Ma {
 	}
 }
 
-func (a *Ma) Next() float32 {
+func (a *MovingAverage) Next() float32 {
 	a.t++
 
 	var sum float32

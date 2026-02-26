@@ -6,7 +6,7 @@ import (
 	"github.com/kelindar/noise"
 )
 
-type RW struct {
+type RandomWalk struct {
 	Seed uint32
 
 	Mu    float32 // long-term mean
@@ -17,8 +17,8 @@ type RW struct {
 	value float32
 }
 
-func NewRW(seed uint32, mu, theta, sigma float32) *RW {
-	return &RW{
+func NewRandomWalk(seed uint32, mu, theta, sigma float32) *RandomWalk {
+	return &RandomWalk{
 		Seed:  seed,
 		Mu:    mu,
 		Theta: theta,
@@ -32,19 +32,19 @@ func NewRW(seed uint32, mu, theta, sigma float32) *RW {
 // tau:  time constant in seconds (how long memory lasts)
 // sigma: continuous volatility (units per sqrt(second))
 // dt:   step duration in seconds
-func NewRWWithTimescale(seed uint32, mean, tau, sigma, dt float64) *RW {
+func NewRandomWalkWithTimescale(seed uint32, mean, tau, sigma, dt float64) *RandomWalk {
 	theta := float32(dt / tau)
 	stepSigma := float32(sigma * math.Sqrt(dt))
 
-	return NewRW(seed, float32(mean), theta, stepSigma)
+	return NewRandomWalk(seed, float32(mean), theta, stepSigma)
 }
 
-func (r *RW) Next() float32 {
-	r.t++
+func (rw *RandomWalk) Next() float32 {
+	rw.t++
 
-	noiseTerm := noise.White(r.Seed, r.t)
+	noiseTerm := noise.White(rw.Seed, rw.t)
 
-	r.value += r.Theta*(r.Mu-r.value) + r.Sigma*noiseTerm
+	rw.value += rw.Theta*(rw.Mu-rw.value) + rw.Sigma*noiseTerm
 
-	return r.value
+	return rw.value
 }
