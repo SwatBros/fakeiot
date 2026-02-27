@@ -39,3 +39,10 @@ func (hec *HttpEndpointConnector) Send(data any) error {
 	hec.data = data
 	return nil
 }
+
+func (hec *HttpEndpointConnector) GetData() any {
+	hec.mu.RLock()
+	defer hec.mu.RUnlock()
+
+	return hec.data
+}
