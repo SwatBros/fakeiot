@@ -1,7 +1,7 @@
 package random
 
 type Random interface {
-	Next() float32
+	Next() float64
 }
 
 type MultiRandom struct {
@@ -12,8 +12,8 @@ func NewMultiRandom(processes ...Random) *MultiRandom {
 	return &MultiRandom{processes: processes}
 }
 
-func (m *MultiRandom) Next() float32 {
-	var sum float32
+func (m *MultiRandom) Next() float64 {
+	var sum float64
 	for _, p := range m.processes {
 		sum += p.Next()
 	}

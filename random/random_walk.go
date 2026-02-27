@@ -9,15 +9,15 @@ import (
 type RandomWalk struct {
 	Seed uint32
 
-	Mu    float32 // long-term mean
-	Theta float32 // mean reversion strength (0 = pure random walk)
-	Sigma float32 // noise scale
+	Mu    float64 // long-term mean
+	Theta float64 // mean reversion strength (0 = pure random walk)
+	Sigma float64 // noise scale
 
 	t     uint
-	value float32
+	value float64
 }
 
-func NewRandomWalk(seed uint32, mu, theta, sigma float32) *RandomWalk {
+func NewRandomWalk(seed uint32, mu, theta, sigma float64) *RandomWalk {
 	return &RandomWalk{
 		Seed:  seed,
 		Mu:    mu,
@@ -33,16 +33,16 @@ func NewRandomWalk(seed uint32, mu, theta, sigma float32) *RandomWalk {
 // sigma: continuous volatility (units per sqrt(second))
 // dt:   step duration in seconds
 func NewRandomWalkWithTimescale(seed uint32, mean, tau, sigma, dt float64) *RandomWalk {
-	theta := float32(dt / tau)
-	stepSigma := float32(sigma * math.Sqrt(dt))
+	theta := dt / tau
+	stepSigma := sigma * math.Sqrt(dt)
 
-	return NewRandomWalk(seed, float32(mean), theta, stepSigma)
+	return NewRandomWalk(seed, mean, theta, stepSigma)
 }
 
-func (rw *RandomWalk) Next() float32 {
+func (rw *RandomWalk) Next() float64 {
 	rw.t++
 
-	noiseTerm := noise.White(rw.Seed, rw.t)
+	noiseTerm := float64(noise.White(rw.Seed, rw.t))
 
 	rw.value += rw.Theta*(rw.Mu-rw.value) + rw.Sigma*noiseTerm
 

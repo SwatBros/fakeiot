@@ -8,7 +8,7 @@ type WhiteNoise struct {
 	t int
 }
 
-func (wn *WhiteNoise) Next() float32 {
+func (wn *WhiteNoise) Next() float64 {
 	wn.t++
-	return noise.White(wn.Seed, wn.t)
+	return float64(noise.White(wn.Seed, wn.t))
 }
