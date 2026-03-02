@@ -11,13 +11,13 @@ type Generator interface {
 }
 
 type TemperatureGenerator struct {
-	random random.Random
+	random random.TimeDependantRandom
 
 	dailySeasonality  *SineGenerator
 	yearlySeasonality *SineGenerator
 }
 
-func NewTemperatureGenerator(random random.Random, dailySeasonality, yearlySeasonality *SineGenerator) *TemperatureGenerator {
+func NewTemperatureGenerator(random random.TimeDependantRandom, dailySeasonality, yearlySeasonality *SineGenerator) *TemperatureGenerator {
 	return &TemperatureGenerator{
 		random: random,
 	}
@@ -38,16 +38,16 @@ func (tg *TemperatureGenerator) Next(delta float64) float64 {
 		cycle += tg.yearlySeasonality.Next(delta)
 	}
 
-	return cycle + float64(tg.random.Next())
+	return cycle + float64(tg.random.Step(delta))
 }
 
 type TemperatureGeneratorBuilder struct {
-	random            random.Random
+	random            random.TimeDependantRandom
 	dailySeasonality  *SineGenerator
 	yearlySeasonality *SineGenerator
 }
 
-func NewTemperatureGeneratorBuilder(random random.Random) *TemperatureGeneratorBuilder {
+func NewTemperatureGeneratorBuilder(random random.TimeDependantRandom) *TemperatureGeneratorBuilder {
 	return &TemperatureGeneratorBuilder{
 		random: random,
 	}

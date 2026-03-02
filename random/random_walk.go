@@ -7,44 +7,45 @@ import (
 )
 
 type RandomWalk struct {
-	Seed uint32
+	Seed  uint32
+	Mu    float64
+	Tau   float64
+	Sigma float64
 
-	Mu    float64 // long-term mean
-	Theta float64 // mean reversion strength (0 = pure random walk)
-	Sigma float64 // noise scale
-
-	t     uint
+	time  float64
 	value float64
 }
 
-func NewRandomWalk(seed uint32, mu, theta, sigma float64) *RandomWalk {
+func NewRandomWalk(seed uint32, mu, tau, sigma float64) *RandomWalk {
 	return &RandomWalk{
 		Seed:  seed,
 		Mu:    mu,
-		Theta: theta,
+		Tau:   tau,
 		Sigma: sigma,
 		value: mu,
 	}
 }
 
-// NewRWWithTimescale creates an OU process with a physical time constant.
-// mean: long term mean
-// tau:  time constant in seconds (how long memory lasts)
-// sigma: continuous volatility (units per sqrt(second))
-// dt:   step duration in seconds
-func NewRandomWalkWithTimescale(seed uint32, mean, tau, sigma, dt float64) *RandomWalk {
-	theta := dt / tau
-	stepSigma := sigma * math.Sqrt(dt)
+func (rw *RandomWalk) Step(dt float64) float64 {
+	rw.time += dt
 
-	return NewRandomWalk(seed, mean, theta, stepSigma)
-}
+	expTerm := math.Exp(-dt / rw.Tau)
 
-func (rw *RandomWalk) Next() float64 {
-	rw.t++
+	variance := (rw.Sigma * rw.Sigma) * (rw.Tau / 2.0) * (1.0 - expTerm*expTerm)
+	stddev := math.Sqrt(variance)
 
-	noiseTerm := float64(noise.White(rw.Seed, rw.t))
+	noiseTerm := float64(noise.White(rw.Seed, uint(uint64(rw.time*1e9))))
 
-	rw.value += rw.Theta*(rw.Mu-rw.value) + rw.Sigma*noiseTerm
+	rw.value = rw.Mu +
+		(rw.value-rw.Mu)*expTerm +
+		stddev*noiseTerm
 
 	return rw.value
+}
+
+func (rw *RandomWalk) Value() float64 { return rw.value }
+
+func (rw *RandomWalk) Reset() {
+	rw.time = 0
+	rw.value = rw.Mu
 }
