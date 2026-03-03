@@ -8,11 +8,16 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+type RouterConfig struct {
+	Router *chi.Mux
+	Addr   string
+}
+
 type Generator struct {
-	World   World
-	Sensors []Sensor
-	Hooks   []Hook
-	Router  *chi.Mux
+	World        World
+	Sensors      []Sensor
+	Hooks        []Hook
+	RouterConfig *RouterConfig
 }
 
 func (g *Generator) GenerateSteps(steps uint) error {
@@ -46,8 +51,8 @@ func (g *Generator) RealTime(tick time.Duration) error {
 	ticker := time.NewTicker(tick)
 	defer ticker.Stop()
 
-	if g.Router != nil {
-		go http.ListenAndServe(":3000", g.Router)
+	if g.RouterConfig != nil && g.RouterConfig.Router != nil {
+		go http.ListenAndServe(g.RouterConfig.Addr, g.RouterConfig.Router)
 	}
 
 	for range ticker.C {
