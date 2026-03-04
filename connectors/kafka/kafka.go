@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	confluentKafka "github.com/confluentinc/confluent-kafka-go/kafka"
+	confluentKafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 // KafkaConnector sends sensor data to a Kafka topic
